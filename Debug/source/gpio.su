@@ -1,0 +1,14 @@
+gpio.c:42:6:PORTB_CLK	8	static
+gpio.c:47:6:PORTD_CLK	8	static
+gpio.c:52:6:INIT_LED	8	static
+gpio.c:78:6:INIT_RW_PIN	8	static
+gpio.c:89:6:RED_ON	8	static
+gpio.c:94:6:RED_OFF	8	static
+gpio.c:99:6:GREEN_ON	8	static
+gpio.c:104:6:GREEN_OFF	8	static
+gpio.c:109:6:BLUE_ON	8	static
+gpio.c:114:6:BLUE_OFF	8	static
+gpio.c:120:6:DEFAULT_LED_STATE	8	static
+gpio.c:128:6:REDE_ON	8	static
+gpio.c:133:6:REDE_OFF	8	static
+gpio.c:138:6:INIT_TEST	8	static

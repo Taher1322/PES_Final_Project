@@ -1,0 +1,4 @@
+accelerometer.c:19:5:init_mma	8	static
+accelerometer.c:26:6:read_full_xyz	32	static
+accelerometer.c:55:6:read_xyz	8	static
+accelerometer.c:67:6:convert_xyz_to_roll_pitch	40	static
