@@ -43,6 +43,7 @@
 #define DATA_BITS   			(0)         //2 modes for data - 8 bits and 9 bits --> For 8 bits - 0 and For 9 bits - 1
 #define STOP_BITS   			(1)         //2 modes for Stop bit --> For 1 stop bit - 0 and For 2 Stop bits - 1
 
+//Defining the request frame with 16bit Modbus CRC as per the datasheet - Attached in Github repo in Modbus Memory Mapping
 unsigned char Meter_Address[4][10] = {
 	{0x00, 0x01, 0x03, 0x00, 0x63, 0x00, 0x02, 0x34, 0x15, '\0'},	 //R Phase Voltage - V
 	{0x00, 0x01, 0x03, 0x00, 0x71, 0x00, 0x02, 0x94, 0x10, '\0'}, 	 //R Phase LineCurrent - A
@@ -50,11 +51,12 @@ unsigned char Meter_Address[4][10] = {
 	{0x00, 0x01, 0x03, 0x00, 0xDF, 0x00, 0x02, 0xF5, 0xF1, '\0'},	//Forward Active energy - KWh
 };
 
+//Variables used in run time
 uint8_t input_key;
 char rgucTemp[100] = "\0";
 int status_flag = 0;
 
-//Function Initializing UART
+//Function Initializing UART0
 void Init_UART0(uint32_t baud_rate) {
 	uint16_t sbr;
 	//uint8_t temp;
@@ -210,7 +212,7 @@ int __sys_write(int handle, char *buf, int size)
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-
+//Function to Initialize UART1
 void Init_UART1(uint32_t baud_rate) {
 	uint16_t sbr;
 	//uint8_t temp;
@@ -263,7 +265,7 @@ void Init_UART1(uint32_t baud_rate) {
 	UART1->C3 = UART_C3_TXINV(0) | UART_C3_ORIE(0)| UART_C3_NEIE(0)
 			| UART_C3_FEIE(1) | UART_C3_PEIE(1);
 
-	//Clear error flags
+	//Clear error flags - Read only flags
 	//UART1->S1 = UART_S1_OR(1) | UART_S1_NF(1) | UART_S1_FE(1) | UART_S1_PF(1);
 
 	//Send LSB first, do not invert received data
@@ -294,7 +296,7 @@ void Init_UART1(uint32_t baud_rate) {
 	//{}
 }
 
-
+//Function to transmit the request frames
 void transmit_data1(unsigned char *pdata, int total_character)
 {
 	// Wait until complete string is transmitted on serial port
@@ -319,26 +321,32 @@ void transmit_data1(unsigned char *pdata, int total_character)
 	}
 }
 
-
+//UART1 receiver handler
 void UART1_IRQHandler(void)
 {
 //uint8_t UART1_Receive_Poll(void) {
 
 	int i=0;
+	//Waiting to read the data
 	while (!(UART1->S1 & UART_S1_RDRF_MASK))
 		;
 
+	//Storing the data in Array
 	rgucTemp[i] = UART1->D;
 	i++;
+	//Defining the status flag to keep a track of actual and no data
 	status_flag = 1;
 }
 
+//Funtion to read modbus data, deocde and return the values
 int modbus_read(int i)
 {
 	int fReadData = -1;
 
 	memset(rgucTemp, 0, 50);
 
+	//Flow to implement Rs485 protocol - GPIO High to few ms, then transmit the request frame, turn the GPIO Low
+	//Then wait for 500ms - Standard as per the meter and get the response in UART1 handler - Which is then decoded and returned
 	REDE_ON();
 	delay(50);
 	transmit_data1(Meter_Address[i], sizeof(Meter_Address[i]));
@@ -346,6 +354,7 @@ int modbus_read(int i)
 	REDE_OFF();
 	delay(500);
 
+	//If valid data then decode the data as per hex converter
 	if(status_flag == 1)
 	{
 		*((char *)&fReadData + 3) = rgucTemp[5];

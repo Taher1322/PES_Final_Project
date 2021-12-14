@@ -38,7 +38,7 @@
 #include <MKL25Z4.H>
 
 /********************************************************************************************************
- * void Init_UART0(uint32_t baud_rate): This function Initializes UART
+ * void Init_UART0(uint32_t baud_rate): This function Initializes UART0
  *
  * @param Baud Rate: Takes Input baud rate and initialized the UART
  *
@@ -54,21 +54,53 @@
  *
  * BR : is calculated depending on baud rate and is stored in BDL and BDH (lower and higher register)
  ***********************************************************************************************************/
-
 void Init_UART0(uint32_t baud_rate);
 
+/********************************************************************************************************
+ * void Init_UART1(uint32_t baud_rate): This function Initializes UART1
+ *
+ * @param Baud Rate: Takes Input baud rate and initialized the UART
+ *
+ * @returns void
+ *
+ * Baud rate is calculated using the following formula
+ *
+ * Baud rate = Baud Rate = Baud Clock / ((OSR+1) * BR)
+ *
+ * where OSR is Sampling rate we have used OSR=16
+ *
+ * Baud clock is defined here as 24Mhz
+ *
+ * BR : is calculated depending on baud rate and is stored in BDL and BDH (lower and higher register)
+ ***********************************************************************************************************/
 void Init_UART1(uint32_t baud_rate);
 
-void transmit_data0(unsigned char *pdata, int total_character);
-
+/*************************************************************************************************************
+ *
+ * Name :		  	void transmit_data1(unsigned char *pdata, int total_character);
+ *
+ *
+ * Description :	This function is used to transmit the request frames with 16bit CRC to TTL-RS485 converter
+ *
+ *
+ * Inputs: Request Frame and Size of Request frame
+ *
+ * Return: NONE
+ *************************************************************************************************************/
 void transmit_data1(unsigned char *pdata, int total_character);
 
-void uart_init_howdy(uint32_t baud_rate);
-
-uint8_t UART0_Receive_Poll(void);
-
-uint8_t UART1_Receive_Poll(void);
-
+/*************************************************************************************************************
+ *
+ * Name :		  	int modbus_read(int i)
+ *
+ *
+ * Description :	Funtion to read modbus data, deocde and return the values
+ *
+ *
+ * Inputs:		Frame parameter selection
+ *
+ * Return: Response value
+ *************************************************************************************************************/
 int modbus_read(int i);
 
 #endif /* UART_H_ */

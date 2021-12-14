@@ -124,38 +124,39 @@ void DEFAULT_LED_STATE(){
 
 }
 
-//ON -- HIGH
+//Function to Make the GPIO HIGH to perform Read-Write operation
 void REDE_ON(){
 	GPIOD->PSOR |= (1 << REDE);
 }
 
-//OFF -- LOW
+//Function to Make the GPIO LOW to perform Read-Write operation
 void REDE_OFF(){
 	GPIOD->PCOR |= (1 << REDE);
 }
 
-//Running this function on start-up as mentioned in STEP 1
+//Running this function on start-up
 void INIT_TEST(){
 
 	//Making all the state to OFF
 	DEFAULT_LED_STATE();
-	//RED Led pattern 500ms ON and 100ms OFF
+
+	//RED Led pattern 100ms ON and 50ms OFF
 	RED_ON();
-    delay(100);		//Delay for 500ms
+    delay(100);		//Delay for 100ms
     RED_OFF();
-    delay(50);		//Delay for 100ms
+    delay(50);		//Delay for 50ms
 
-    //GREEN Led pattern 500ms ON and 100ms OFF
+    //GREEN Led pattern 100ms ON and 50ms OFF
     GREEN_ON();
-    delay(100);		//Delay for 500ms
+    delay(100);		//Delay for 100ms
     GREEN_OFF();
-    delay(50);		//Delay for 100ms
+    delay(50);		//Delay for 50ms
 
-    //BLUE Led pattern 500ms ON and 100ms OFF
+    //BLUE Led pattern 100ms ON and 50ms OFF
     BLUE_ON();
-    delay(100);		//Delay for 500ms
+    delay(100);		//Delay for 100ms
     BLUE_OFF();
-    delay(50);		//Delay for 100ms
+    delay(50);		//Delay for 50ms
 
 }
 

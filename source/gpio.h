@@ -106,10 +106,9 @@ void DEFAULT_LED_STATE();
  *
  *
  * Description :	This function initializes RED, GREEN and BLUE led as follows
- * RED ON for 500ms and OFF for 100ms
- * GREEN ON for 500ms and OFF for 100ms
- * BLUE ON for 500ms and OFF for 100ms
- * WHITE ON for 100ms and OFF for 100ms
+ * RED ON for 100ms and OFF for 50ms
+ * GREEN ON for 100ms and OFF for 50ms
+ * BLUE ON for 100ms and OFF for 50ms
  *
  * Inputs: NONE
  *
@@ -117,9 +116,21 @@ void DEFAULT_LED_STATE();
  *************************************************************************************************************/
 void INIT_TEST();
 
+/*************************************************************************************************************
+ *
+ * Name :		  	void INIT_RW_PIN()
+ *
+ *
+ *
+ * Description :	This function initializes GPIO for Modbus Read-Write operation - TTL-RS485
+
+ * Inputs: NONE
+ *
+ * Return: NONE
+ *************************************************************************************************************/
 void INIT_RW_PIN();
 
-void INIT_TEST();
+//void INIT_TEST();
 
 /*************************************************************************************************************
  *
@@ -227,8 +238,32 @@ void BLUE_ON();
  *************************************************************************************************************/
 void BLUE_OFF();
 
+/*************************************************************************************************************
+ *
+ * Name :		  	void REDE_ON()
+ *
+ *
+ *
+ * Description :	This function initializes GPIO to turn HIGH
+ *
+ * Inputs: NONE
+ *
+ * Return: NONE
+ *************************************************************************************************************/
 void REDE_ON();
 
+/*************************************************************************************************************
+ *
+ * Name :		  	void REDE_OFF()
+ *
+ *
+ *
+ * Description :	This function initializes GPIO to turn LOW
+ *
+ * Inputs: NONE
+ *
+ * Return: NONE
+ *************************************************************************************************************/
 void REDE_OFF();
 
 #endif /* LED_H_ */
