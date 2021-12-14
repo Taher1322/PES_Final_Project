@@ -1,78 +1,123 @@
+/*****************************************************************************
+* Copyright (C) 2021 by Taher Ujjainwala and Howdy Pierce
+*
+* Redistribution, modification or use of this software in source or binary
+* forms is permitted as long as the files maintain this copyright. Users are
+* permitted to modify this and use it to learn about the field of embedded
+* software. Taher Ujjainwala and the University of Colorado are not liable for
+* any misuse of this material.
+*
+**************************************************************************/
+
+
+/*************************
+ *
+ *
+ *
+ *    File name   : i2c.c
+ *    Description : This file defines the function to initialize I2C0 bus protocol
+ *
+ *    Author TAHER UJJAINWALA
+ * 	  Tools : MCUXpressor IDE
+ * 	  General References used in development:
+ * 	  DEAN I2C section
+ *
+ *
+ *    Date  : 12/13/2021
+ *
+ *
+ */
+
+//Including all the header files
 #include <MKL25Z4.H>
 #include "i2c.h"
+
+//Defining variables
 int lock_detect=0;
 int i2c_lock=0;
 
-//init i2c0
-void i2c_init(void)
+
+//Function to Initialize I2C bus
+void Init_I2C(void)
 {
-	//clock i2c peripheral and port E
+	//Enabling I2C0 clock and Port E clock
 	SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
 	SIM->SCGC5 |= (SIM_SCGC5_PORTE_MASK);
 
-	//set pins to I2C function
+	//Defining the MUX port as Alternative Function on Port E 24 and 25
 	PORTE->PCR[24] |= PORT_PCR_MUX(5);
 	PORTE->PCR[25] |= PORT_PCR_MUX(5);
 
-	//set to 100k baud
-	//baud = bus freq/(scl_div+mul)
+	//Setting the Baud Rate to 100K using the formula Baud = Bus Freq/ (SCL_DIV + MUL)
  	//~400k = 24M/(64); icr=0x12 sets scl_div to 64
+	I2C0->F = (I2C_F_ICR(0x10) | I2C_F_MULT(0));
 
- 	I2C0->F = (I2C_F_ICR(0x10) | I2C_F_MULT(0));
-
-	//enable i2c and set to master mode
+	//Enabling I2C and Set to Master Mode
 	I2C0->C1 |= (I2C_C1_IICEN_MASK);
 
-	// Select high drive mode
+	//Select High Drive Mode
 	I2C0->C2 |= (I2C_C2_HDRS_MASK);
 }
 
-
+//Function to Check the I2C bus busy status
 void i2c_busy(void){
-	// Start Signal
+
+	//Start Signal
 	lock_detect=0;
 	I2C0->C1 &= ~I2C_C1_IICEN_MASK;
 	I2C_TRAN;
 	I2C_M_START;
 	I2C0->C1 |=  I2C_C1_IICEN_MASK;
-	// Write to clear line
-	I2C0->C1 |= I2C_C1_MST_MASK; /* set MASTER mode */
-	I2C0->C1 |= I2C_C1_TX_MASK; /* Set transmit (TX) mode */
+
+	//Write to clear line
+	//Select the Master Mode and Set Transmit mode
+	I2C0->C1 |= I2C_C1_MST_MASK;
+	I2C0->C1 |= I2C_C1_TX_MASK;
 	I2C0->D = 0xFF;
+
+	//Hard spin loop waiting for the Interrupt
 	while ((I2C0->S & I2C_S_IICIF_MASK) == 0U) {
-	} /* wait interrupt */
-	I2C0->S |= I2C_S_IICIF_MASK; /* clear interrupt bit */
+	}
+	//Clear the Interrupt Bit
+	I2C0->S |= I2C_S_IICIF_MASK;
 
 
-							/* Clear arbitration error flag*/
+	//Clear the arbitration error flag
 	I2C0->S |= I2C_S_ARBL_MASK;
 
 
-							/* Send start */
+	//Send start, set transmit mode, start signal generate
 	I2C0->C1 &= ~I2C_C1_IICEN_MASK;
-	I2C0->C1 |= I2C_C1_TX_MASK; /* Set transmit (TX) mode */
-	I2C0->C1 |= I2C_C1_MST_MASK; /* START signal generated */
-
-	I2C0->C1 |= I2C_C1_IICEN_MASK;
-							/*Wait until start is send*/
-
-							/* Send stop */
-	I2C0->C1 &= ~I2C_C1_IICEN_MASK;
+	I2C0->C1 |= I2C_C1_TX_MASK;
 	I2C0->C1 |= I2C_C1_MST_MASK;
-	I2C0->C1 &= ~I2C_C1_MST_MASK; /* set SLAVE mode */
-	I2C0->C1 &= ~I2C_C1_TX_MASK; /* Set Rx */
+
+	//Wait until Start is send
 	I2C0->C1 |= I2C_C1_IICEN_MASK;
 
 
-								/* wait */
-							/* Clear arbitration error & interrupt flag*/
+	//Send stop once the start is sent
+	I2C0->C1 &= ~I2C_C1_IICEN_MASK;
+
+	//Set Slave mode
+	I2C0->C1 |= I2C_C1_MST_MASK;
+	I2C0->C1 &= ~I2C_C1_MST_MASK;
+
+	//Set the receiver mask
+	I2C0->C1 &= ~I2C_C1_TX_MASK;
+	I2C0->C1 |= I2C_C1_IICEN_MASK;
+
+
+
+	//Wait
 	I2C0->S |= I2C_S_IICIF_MASK;
+
+	//Clear the arbitration error flag and interrupt flag
 	I2C0->S |= I2C_S_ARBL_MASK;
 	lock_detect=0;
 	i2c_lock=1;
 }
 
-//#pragma no_inline
+//This function will Wait for the System
 void i2c_wait(void) {
 	lock_detect = 0;
 	while(((I2C0->S & I2C_S_IICIF_MASK)==0) & (lock_detect < 200)) {
@@ -83,105 +128,121 @@ void i2c_wait(void) {
 	I2C0->S |= I2C_S_IICIF_MASK;
 }
 
-//send start sequence
+//This function will send start sequence
 void i2c_start()
 {
-	I2C_TRAN;							/*set to transmit mode */
-	I2C_M_START;					/*send start	*/
+	//Set to Transmit Mode
+	I2C_TRAN;
+
+	//Send the Start Signal
+	I2C_M_START;
 }
 
-//send device and register addresses
-//#pragma no_inline
+//This function will send device and register addresses
 void i2c_read_setup(uint8_t dev, uint8_t address)
 {
-	I2C0->D = dev;			  /*send dev address	*/
-	I2C_WAIT							/*wait for completion */
+	//Sending the device address and waiting for completion
+	I2C0->D = dev;
+	I2C_WAIT
 
-	I2C0->D =  address;		/*send read address	*/
-	I2C_WAIT							/*wait for completion */
+	//Sending the read address and waiting for completion
+	I2C0->D =  address;
+	I2C_WAIT
 
-	I2C_M_RSTART;				   /*repeated start */
-	I2C0->D = (dev|0x1);	 /*send dev address (read)	*/
-	I2C_WAIT							 /*wait for completion */
+	//Repeating the start by sending the device address
+	I2C_M_RSTART;
+	I2C0->D = (dev|0x1);
+	//Waiting for completion
+	I2C_WAIT
 
-	I2C_REC;						   /*set to receive mode */
+	//Set to receive mode
+	I2C_REC;
 
 }
 
-//read a byte and ack/nack as appropriate
-// #pragma no_inline
+//This function read a byte and gets the ack/nack
 uint8_t i2c_repeated_read(uint8_t isLastRead)
 {
 	uint8_t data;
 
 	lock_detect = 0;
 
+	//Setting the NACK and ACK after reading
 	if(isLastRead)	{
-		NACK;								/*set NACK after read	*/
+		NACK;
 	} else	{
-		ACK;								/*ACK after read	*/
+		ACK;
 	}
 
-	data = I2C0->D;				/*dummy read	*/
-	I2C_WAIT							/*wait for completion */
+	//Dummy reading and waiting for completion
+	data = I2C0->D;
+	I2C_WAIT
 
+	//Sending stop
 	if(isLastRead)	{
-		I2C_M_STOP;					/*send stop	*/
+		I2C_M_STOP;
 	}
-	data = I2C0->D;				/*read data	*/
+
+	//Reading the actual data
+	data = I2C0->D;
 
 	return  data;
 }
 
 
 
-//////////funcs for reading and writing a single byte
-//using 7bit addressing reads a byte from dev:address
-// #pragma no_inline
+//This function reads and write a single byte, it uses 7 bit bus addressing to read from device address
 uint8_t i2c_read_byte(uint8_t dev, uint8_t address)
 {
 	uint8_t data;
 
-	I2C_TRAN;							/*set to transmit mode */
-	I2C_M_START;					/*send start	*/
-	I2C0->D = dev;			  /*send dev address	*/
-	I2C_WAIT							/*wait for completion */
+	//Setting to transmit mode, sending start, sending device address and waiting for completion
+	I2C_TRAN;
+	I2C_M_START;
+	I2C0->D = dev;
+	I2C_WAIT
 
-	I2C0->D =  address;		/*send read address	*/
-	I2C_WAIT							/*wait for completion */
+	//Sending the read address and waiting for completion
+	I2C0->D =  address;
+	I2C_WAIT
 
-	I2C_M_RSTART;				   /*repeated start */
-	I2C0->D = (dev|0x1);	 /*send dev address (read)	*/
-	I2C_WAIT							 /*wait for completion */
+	//Sending the start again with the device address and waiting for completion
+	I2C_M_RSTART;
+	I2C0->D = (dev|0x1);
+	I2C_WAIT
 
-	I2C_REC;						   /*set to recieve mode */
-	NACK;									 /*set NACK after read	*/
+	//Setting to receive mode and setting NACK
+	I2C_REC;
+	NACK;
 
-	data = I2C0->D;					/*dummy read	*/
-	I2C_WAIT								/*wait for completion */
+	//Dummy reading the data and waiting for completion
+	data = I2C0->D;
+	I2C_WAIT
 
-	I2C_M_STOP;							/*send stop	*/
-	data = I2C0->D;					/*read data	*/
+	//Sending the stop and reading the actual data
+	I2C_M_STOP;
+	data = I2C0->D;
 
 	return data;
 }
 
 
-
-//using 7bit addressing writes a byte data to dev:address
-//#pragma no_inline
+//This function writes a byte to device address specified and uses 7 bit addressing
 void i2c_write_byte(uint8_t dev, uint8_t address, uint8_t data)
 {
 
-	I2C_TRAN;							/*set to transmit mode */
-	I2C_M_START;					/*send start	*/
-	I2C0->D = dev;			  /*send dev address	*/
-	I2C_WAIT						  /*wait for ack */
-
-	I2C0->D =  address;		/*send write address	*/
+	//Setting to transmit mode, sending start, sending device address and waiting for acknowledge
+	I2C_TRAN;
+	I2C_M_START;
+	I2C0->D = dev;
 	I2C_WAIT
 
-	I2C0->D = data;				/*send data	*/
+	//Sending the write address and waiting
+	I2C0->D =  address;
+	I2C_WAIT
+
+	//Sendind the data to write, waiting and stopping
+	I2C0->D = data;
 	I2C_WAIT
 	I2C_M_STOP;
 

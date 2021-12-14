@@ -22,7 +22,12 @@ source/PES_Final_Project.o source/PES_Final_Project.d: \
  ../source/UART.h \
  C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\CMSIS/MKL25Z4.H \
  ../source/sysclock.h ../source/delay.h ../source/gpio.h \
- ../source/RS485.h ../source/accelerometer.h ../source/i2c.h
+ ../source/command_line.h ../source/cbfifo.h \
+ C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\CMSIS/core_cm0plus.h \
+ ../source/command_process.h \
+ C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\CMSIS/hexdump.h \
+ ../source/accelerometer.h ../source/i2c.h ../source/adc.h \
+ ../source/test_cbfifo.h ../source/test_i2c.h
 
 C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\board/board.h:
 
@@ -72,8 +77,22 @@ C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\C
 
 ../source/gpio.h:
 
-../source/RS485.h:
+../source/command_line.h:
+
+../source/cbfifo.h:
+
+C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\CMSIS/core_cm0plus.h:
+
+../source/command_process.h:
+
+C:\Users\ujjai\Documents\MCUXpressoIDE_11.2.0_4120\workspace\PES_Final_Project\CMSIS/hexdump.h:
 
 ../source/accelerometer.h:
 
 ../source/i2c.h:
+
+../source/adc.h:
+
+../source/test_cbfifo.h:
+
+../source/test_i2c.h:

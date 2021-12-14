@@ -32,6 +32,7 @@
  * @file    PES_Final_Project.c
  * @brief   Application entry point.
  */
+//Including all the header files
 #include <stdio.h>
 #include "board.h"
 #include "peripherals.h"
@@ -40,20 +41,21 @@
 #include "MKL25Z4.h"
 #include "fsl_debug_console.h"
 /* TODO: insert other include files here. */
-
 #include "UART.h"
 #include "sysclock.h"
 #include "delay.h"
 #include "gpio.h"
-#include "RS485.h"
+#include "command_line.h"
+#include "command_process.h"
+#include "cbfifo.h"
+#include "hexdump.h"
 #include "accelerometer.h"
 #include "i2c.h"
-/* TODO: insert other definitions and declarations here. */
-//unsigned char voltage[] = {0x01, 0x03, 0x00, 0x63, 0x00, 0x02, 0x34, 0x15};
-unsigned char voltage[] = {0x01, 0x03, 0x00, 0x63, 0x00, 0x02, 0x34, 0x15, '\0'}; //006300023415'};
-char rgucTemp[100] = "\0";
-volatile char input_key;
+#include "adc.h"
+#include "test_cbfifo.h"
+#include "test_i2c.h"
 
+/* TODO: insert other definitions and declarations here. */
 /*
  * @brief   Application entry point.
  */
@@ -68,72 +70,62 @@ int main(void) {
     BOARD_InitDebugConsole();
 #endif
 
-    //PRINTF("Hello World\n");
-
-    sysclock_init();
-
+    //Enabling Port B clock
     PORTB_CLK();
 
+    //Enabling Port D clock
     PORTD_CLK();
 
+    //Initializing the RGB On Board LED
     INIT_LED();
 
+    //Default LED state as OFF
     DEFAULT_LED_STATE();
 
+    //Initializing the Read-Write Pin for RS485
     INIT_RW_PIN();
 
-    //INIT_TEST();
+    //RGB Test Sequence
+    INIT_TEST();
+
+    //Default Read-Write Pin as Low
     REDE_OFF();
 
+    //Initializing the ADC
+    Init_ADC();
 
+    //Initializing the UART0 for command processor
     Init_UART0(9600);
 
-    //Init_UART1(9600);
+    //Initializing the UART1 for RS485 communication
+    Init_UART1(9600);
 
-    uart_init_howdy(9600);
+    //Initializing the I2C protocol bus
+    Init_I2C();
 
+    //Initializing MMA sensor
+    if (!init_mma()) {
 
-//    i2c_init();																/* init i2c	*/
-//    if (!init_mma()) {												/* init mma peripheral */
-//    	//Control_RGB_LEDs(1, 0, 0);							/* Light red error LED */
-//    	while (1)																/* not able to initialize mma */
-//    		;
-//    }
-//
-//    delay(100);
-//
-//    memset(rgucTemp, 0, sizeof(rgucTemp));
+    	while (1)
+    		;
+    }
 
-    //PRINTF("Size of array is %d\n\r", sizeof(voltage));
-    //PRINTF("HEX string is %s\n\r", voltage);
-
-    int size = sizeof(voltage);
-
-    //transmit_data0(voltage, size);
-
-    REDE_ON();
-    delay(50);
-    transmit_data0(voltage, size);
     delay(100);
-    REDE_OFF();
-    delay(500);
 
-    //UART0_Receive_Poll();
-    //read_full_xyz();
+    //Testing the I2C - Automated test
+    test_i2c();
 
-    //unsigned char buffer[] = "H"; // From UART 1";
-
-    //transmit_data1(buffer, sizeof(buffer));
+    //Interactive print statements
+    printf( "Welcome to PES Final Project \r\n");
+    printf("?");
 
 
-   //uint8_t c;
     /* Enter an infinite loop, just incrementing a counter. */
     while(1) {
-    	//c = UART1_Receive_Poll();
-    	if(input_key >0)
-    		printf("%c\n\r",input_key);
-    	//printf("%d", c);
 
+    	//Reading user input from terminal
+    	serial_input();
     }
     return 0 ;
 }
+

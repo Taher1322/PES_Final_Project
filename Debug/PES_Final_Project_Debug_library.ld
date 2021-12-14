@@ -6,11 +6,11 @@
  * Generated linker script file for MKL25Z128xxx4
  * Created from library.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.23
- * MCUXpresso IDE v11.2.0 [Build 4120] [2020-07-09] on Dec 12, 2021 12:17:56 PM
+ * MCUXpresso IDE v11.2.0 [Build 4120] [2020-07-09] on Dec 13, 2021 10:40:10 PM
  */
 
 GROUP (
-  "libcr_semihost_nf.a"
+  "libcr_nohost_nf.a"
   "libcr_c.a"
   "libcr_eabihelpers.a"
   "libgcc.a"

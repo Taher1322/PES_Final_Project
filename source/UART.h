@@ -69,4 +69,6 @@ uint8_t UART0_Receive_Poll(void);
 
 uint8_t UART1_Receive_Poll(void);
 
+int modbus_read(int i);
+
 #endif /* UART_H_ */

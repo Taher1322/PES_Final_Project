@@ -14,7 +14,7 @@
 #define NACK 	        I2C0->C1 |= I2C_C1_TXAK_MASK
 #define ACK           I2C0->C1 &= ~I2C_C1_TXAK_MASK
 
-void i2c_init(void);
+void Init_I2C(void);
 
 void i2c_start(void);
 void i2c_read_setup(uint8_t dev, uint8_t address);
